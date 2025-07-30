@@ -9,7 +9,7 @@ public class Trellis : GameModule
         base.Init();
 
         // C#-only scripting if false
-        BuildNativeCode = false;
+        BuildNativeCode = true;
     }
 
     /// <inheritdoc />
@@ -18,6 +18,8 @@ public class Trellis : GameModule
         base.Setup(options);
 
         options.ScriptingAPI.IgnoreMissingDocumentationWarnings = true;
+
+        options.PublicDefinitions.Add("COMPILE_WITH_FLAX");
 
         // Here you can modify the build options for your game module
         // To reference another module use: options.PublicDependencies.Add("Audio");
