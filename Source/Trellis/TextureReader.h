@@ -5,28 +5,53 @@
 #include <Engine/Graphics/Textures/TextureData.h>
 
 /// <summary>
-/// Provides methods for reading pixel data from a <see cref="Texture"/>.
+/// A utility class for reading pixel data from a texture.
 /// </summary>
-API_CLASS(Static) class TRELLIS_API TextureReader
+class TextureReader
 {
-	DECLARE_SCRIPTING_TYPE_MINIMAL(TextureReader);
-	private:
-        /// <summary>
-        /// Reads a single pixel's data from a specified texture at a given MipMap level and array slice.
-        /// </summary>
-        /// <param name="texture">The texture to read from.</param>
-        /// <param name="mipIndex">The MipMap level to read from (0 for the highest resolution).</param>
-        /// <param name="arrayIndex">The array slice index for 3D textures or texture arrays.</param>
-        /// <param name="data">A pointer to a byte array where the pixel data will be copied. This array must be large enough to hold the pixel's data (e.g., `bytesPerPixel`).</param>
-        /// <param name="bytesPerPixel">The number of bytes per pixel</param>
-        /// <param name="x">The X-coordinate of the pixel to read.</param>
-        /// <param name="y">The Y-coordinate of the pixel to read.</param>
-        /// <returns>
-        /// Returns 0 on success (EXIT_SUCCESS).
-        /// Returns 1 if the X-coordinate is out of bounds (EXIT_FAILURE_X_OUT_OF_RANGE).
-        /// Returns 2 if the Y-coordinate is out of bounds (EXIT_FAILURE_Y_OUT_OF_RANGE).
-        /// Returns 3 if the texture pointer is null (EXIT_FAILURE_NULL_PTR).
-        /// Returns 4 if the texture mip data could not be loaded (EXIT_FAILURE_LOAD).
-        /// </returns>
-		API_FUNCTION() static int32 Read(Texture* texture, int32 mipIndex, int32 arrayIndex, byte* data, int32 bytesPerPixel, int32 x, int32 y);
+private:
+    Texture* _texture;
+    int32 _mipIndex;
+    int32 _arrayIndex;
+    int32 _bytesPerPixel;
+    int32 _width;
+    int32 _height;
+    TextureMipData _mipData;
+    FlaxStorage::LockData _dataLock;
+public:
+    /// <summary>
+    /// Gets the number of bytes per pixel for the texture's format.
+    /// </summary>
+    /// <returns>The number of bytes per pixel.</returns>
+    int32 BytesPerPixel() const;
+    /// <summary>
+    /// Gets the width of the texture at the current mipmap level.
+    /// </summary>
+    /// <returns>The width of the texture.</returns>
+    int32 Width() const;
+    /// <summary>
+    /// Gets the height of the texture at the current mipmap level.
+    /// </summary>
+    /// <returns>The height of the texture.</returns>
+    int32 Height() const;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TextureReader"/> class.
+    /// </summary>
+    /// <param name="texture">The texture to read from.</param>
+    /// <param name="mipIndex">The mipmap level to read.</param>
+    /// <param name="arrayIndex">The array slice to read (for texture arrays).</param>
+    /// <exception cref="runtime_error">Thrown if the provided <paramref name="texture"/> cannot be read.</exception>
+    TextureReader(Texture* texture, int32 mipIndex, int32 arrayIndex);
+    /// <summary>
+    /// Reads a single pixel from the specified coordinates into a buffer.
+    /// </summary>
+    /// <param name="x">The x-coordinate of the pixel.</param>
+    /// <param name="y">The y-coordinate of the pixel.</param>
+    /// <param name="buffer">The buffer to store the pixel data. The buffer should be at least as large as BytesPerPixel().</param>
+    /// <returns>The number of bytes read, or -1 if the coordinates are out of bounds.</returns>
+    int32 Read(int32 x, int32 y, Span<byte> buffer);
+    /// <summary>
+    /// Finalizes an instance of the <see cref="TextureReader"/> class, ensuring resources are released.
+    /// </summary>
+    ~TextureReader();
 };
